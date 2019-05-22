@@ -1,8 +1,9 @@
-import { Component,ChangeDetectionStrategy,ChangeDetectorRef } from '@angular/core';
+import { Component,ChangeDetectionStrategy,ChangeDetectorRef,OnInit } from '@angular/core';
 import { Prize } from './prize/prize';
 import { GameService } from '../game.service';
-import {Subject,timer} from 'rxjs'
+import {Subject,timer,noop} from 'rxjs'
 import {delay} from 'rxjs/operators'
+import { PrizeComponent } from './prize/prize.component';
 
 @Component({
   selector: 'prize-board',
@@ -10,26 +11,30 @@ import {delay} from 'rxjs/operators'
   styleUrls: ['./prize-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PrizeBoardComponent {
+export class PrizeBoardComponent implements OnInit{
 
   prizes: Array<Prize>;
   showPrize = false;
   hidePrizeBanner = new Subject();
-  prize:String;
+  prize:string;
 
   get columns(){
     return Math.floor(this.prizes.length/3);
   }
 
-  constructor(private gameService: GameService,cdr:ChangeDetectorRef) {
-    this.gameService.prizeState.subscribe((prizes) => {
-      this.prizes = prizes
-    });
-    
+  constructor(private gameService: GameService,private cdr:ChangeDetectorRef) {       
     this.hidePrizeBanner.pipe(delay(5000)).subscribe(()=>{
       this.showPrize = false;
-cdr.detectChanges();
+      cdr.detectChanges();
     })
+  }
+
+  ngOnInit(){
+    this.gameService.prizeState.subscribe((prizes) => {
+      this.prizes = prizes;
+      
+      this.cdr.detectChanges();
+    });
   }
 
   showPrizeBanner(prize){
@@ -38,6 +43,12 @@ cdr.detectChanges();
     this.showPrize = true;
     this.hidePrizeBanner.next();
     }
+    
+    this.gameService.applyPrizeState(prize);
+  }
+
+  getPrize(value){
+    return this.prizes?this.prizes[value]: new Prize("");
   }
 
   check(){

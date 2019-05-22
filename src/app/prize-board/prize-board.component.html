@@ -1,7 +1,7 @@
 <div class="row" *ngFor="let row of columns|times;let i = index">
 	<div class="btn-group">
 		<ng-container *ngFor="let col of 3|times;let j = index">
-			<prize [prize]="prizes[(i*3)+j]" (claimed)="showPrizeBanner($event)"></prize>
+			<prize [prize]="getPrize((i*3)+j)" (claimed)="showPrizeBanner($event)"></prize>
 		</ng-container>
 	</div>
 </div>
